@@ -1,62 +1,214 @@
-var walkersNum = 5;
-var walkers = [];
+const dt = 1.0;
+const Du = 0.2;
+const Dv = 0.1;
+
+// キリン
+// const c1 = 0.082;
+// const c2 = 0.059;
+
+// 模様
+const c1 = 0.046;
+const c2 = 0.063;
+
+// 線
+// const c1 = 0.046
+// const c2 = 0.063
+
+// 線・ドット
+// const c1 = 0.034
+// const c2 = 0.0618
+
+// ドット
+// const c1 = 0.014
+// const c2 = 0.054
+
+// 大きなドット
+// const c1 = 0.0353
+// const c2 = 0.0566
+
+// 細胞
+// const c1= 0.030
+// const c2 = 0.063
+
+// 波
+// const c1 = 0.0159
+// const c2 = 0.045
+
+
+var canvas;
+var cnt = 0;
 
 function setup() {
-    createCanvas(windowWidth, document.body.clientHeight);
-    colorMode(HSB, 360, 100, 100);
-    noStroke();
+    initialize()
+    const r = 10;
+    const cnt = 20;
+    let pos_x;
+    let pos_y;
 
-    for (var i = 0; i < walkersNum; i++) {
-        walkers.push(new Walker());
+    for(let k = 0; k < cnt; k++){
+        pos_x = int(random(0, field.length - 1));
+        pos_y = int(random(0, field[0].length - 1));
+        for(let i=pos_x; i < pos_x + r; i++){
+            for(let j=pos_y; j < pos_y+r; j++){
+                if( i < field.length && j < field[0].length){
+                    field[i][j].u = random(0,1);
+                    field[i][j].v = random(0,1);
+                }
+            }
+        }
     }
+    // capture();
 }
 
 function draw() {
-    for (var i = 0; i < walkersNum; i++) {
-        walkers[i].display();
-        walkers[i].move();
+    render();
+    cnt++;
+    // if( cnt % 100 == 0){
+    //     imagecnd = int(cnt / 100);
+    //     saveCanvas(canvas, "canvas" + zeroPadding(imagecnd, 3), "png");
+    // }
+    if(cnt > 16000){
+        noLoop();
+        cnt = 0;
     }
 }
 
-function Walker() {
-    this.x = width / 2;
-    this.y = height / 2;
-    this.r = max(width, height) / 150;
-    this.delta = this.r;
-    this.c = color(random(360), 20, 100);
+function zeroPadding(num,length){
+    return ('0000000000' + num).slice(-length);
+}
 
-    this.display = function() {
-        fill(this.c);
-        ellipse(this.x, this.y, this.r, this.r);
+function capture(){
+    for(let loop = 0; loop < 8000; loop++ ){
+        render();
     }
+    saveCanvas(canvas, "canvas", "png");
+}
 
-    this.move = function() {
-        this.xSign = random(1) < 0.5 ? 1 : -1;
-        this.ySign = random(1) < 0.5 ? 1 : -1;
+function render(){
+    calcNextFields();
 
-        this.x += this.xSign * this.delta;
-        this.y += this.ySign * this.delta;
-
-        var min = this.r / 2;
-        var xMax = width - this.r / 2;
-        var yMax = height - this.r / 2;
-
-        if (this.x < min) {
-            this.x = xMax;
+    loadPixels();
+    for(let i=0; i < width; i++) {
+        for(let j=0; j< height; j++) {
+            let u = field_next[i][j].u;
+            let color = u * 255;
+            let pix = (i+j*width) * 4;
+            pixels[pix + 0] = color; // R
+            pixels[pix + 1] = color; // G
+            pixels[pix + 2] = color; // B
+            pixels[pix + 3] = 255; // Alpha
         }
-        if (this.x > xMax) {
-            this.x = min;
-        }
-        if (this.y < min) {
-            this.y = yMax;
-        }
-        if (this.y > yMax) {
-            this.y = min;
-        }
+    }
+    updatePixels();
 
+    swap();
+}
+
+// RD Algorithm from Here
+
+// prepare 2 files for swapping
+var field = []
+var field_next = []
+
+function initialize() {
+    canvas = createCanvas(640, 480);
+    pixelDensity(1);
+    initFields();
+}
+
+
+function initFields() {
+    for(let i=0; i < width; i++) {
+        field[i] = [];
+        for(let j=0; j < height; j++){
+            field[i][j] = {u: 1, v: 0};
+        }
+    }
+    field_next = Array.from(field);
+}
+
+function calcNextFields() {
+    for(let i=0; i < field.length; i++) {
+        for(let j=0; j < field[0].length; j++) {
+            let u = field[i][j].u;
+            let v =  field[i][j].v;
+
+            field_next[i][j].u = u + (Du * laplacian_u(i, j) + f(u, v)) * dt;
+            field_next[i][j].v = v + (Dv * laplacian_v(i, j) + g(u, v)) * dt;
+
+            field_next[i][j].u = constrain(field_next[i][j].u, 0, 1);
+            field_next[i][j].v = constrain(field_next[i][j].v, 0, 1);
+        }
     }
 }
 
-function windowResized() {
-    resizeCanvas(windowWidth, windowHeight);
+function f(u, v) {
+    return -u * v * v + c1 * (1-u)
+}
+
+function g(u, v) {
+    return u * v * v - (c1 + c2) * v
+}
+
+const l_array = [
+    [0, 1.0, 0],
+    [1.0, -4.0, 1.0],
+    [0, 1.0, 0]
+];
+
+function laplacian_u (x, y) {
+    // periodic boundary conditions
+    var sum = 0;
+    for(let i = 0; i < 3; i++) {
+        let x_target = x + (i-1);
+        for(let j = 0; j < 3; j++) {
+            let y_target = y + (j-1);
+
+            if(x_target == -1){
+                x_target = field.length -1;
+            } else if (x_target == field.length) {
+                x_target = 0;
+            }
+
+            if(y_target == -1){
+                y_target = field[0].length -1;
+            } else if (y_target == field[0].length) {
+                y_target = 0;
+            }
+
+            sum += field[x_target][y_target].u * l_array[i][j]
+        }
+    }
+    return sum;
+}
+
+function laplacian_v (x, y) {
+    var sum = 0;
+    for(let i = 0; i < 3; i++) {
+        let x_target = x + (i-1);
+        for(let j = 0; j < 3; j++) {
+            let y_target = y + (j-1);
+
+            if(x_target == -1){
+                x_target = field.length -1;
+            } else if (x_target == field.length) {
+                x_target = 0;
+            }
+
+            if(y_target == -1){
+                y_target = field[0].length -1;
+            } else if (y_target == field[0].length) {
+                y_target = 0;
+            }
+
+            sum += field[x_target][y_target].v * l_array[i][j]
+        }
+    }
+    return sum;
+}
+
+function swap() {
+    var tmp = field;
+    field = field_next;
+    field_next = tmp;
 }
