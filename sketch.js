@@ -1,4 +1,4 @@
-const dt = 1.0;
+const dt = 100.0;
 const Du = 0.2;
 const Dv = 0.1;
 
