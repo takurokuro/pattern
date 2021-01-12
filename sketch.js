@@ -2,17 +2,17 @@ const dt = 1.0;
 const Du = 0.2;
 const Dv = 0.1;
 
-// キリンaaa
+// キリン
 // const c1 = 0.082;
 // const c2 = 0.059;
 
 // 模様
-const c1 = 0.046;
-const c2 = 0.063;
+// const c1 = 0.046;
+// const c2 = 0.063;
 
 // 線
-// const c1 = 0.046
-// const c2 = 0.063
+const c1 = 0.046
+const c2 = 0.063
 
 // 線・ドット
 // const c1 = 0.034
