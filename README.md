@@ -9,11 +9,4 @@ Strangerfyのgithubページは以下です。
 お試しレポート記事を書きました。  
 [Strangerfy(と、GitHub Pages)でp5.jsスケッチを背景にしたWebページをさくっと作る : だらっと学習帳](http://blog.livedoor.jp/reona396/archives/55672718.html)
 
-## p5.js スケッチについて
 
-以下のProcessing.jsスケッチをp5.jsに書き直し、一部アレンジしました。  
-[Polka_Dots_Random_Walkers - OpenProcessing](https://www.openprocessing.org/sketch/310924)
-
-## つくった人
-
-[reona396](http://reona396.information.jp/)

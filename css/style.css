@@ -1,13 +1,11 @@
-/* Set gradient here */
 body {
-     /* background: linear-gradient(-90deg, purple, yellow);  */
-    /* background: linear-gradient(-90deg, black, pink, green ); */
-    /* background: linear-gradient(-90deg, yellow, orange, red, green, blue); */
+    background-image: url(../img/zebrawood.jpg);
+    padding-top: 50px;
 }
 
 canvas {
     display:block; /* remove scrollbars */
-    position: absolute;  /* position at top left corner for overlay */
+    /* position: absolute;  position at top left corner for overlay */
     left: 0;
     top: 0;
     z-index: -999;
@@ -16,6 +14,7 @@ canvas {
 h1 {
     color: #111;
     font-family: 'Helvetica Neue', sans-serif;
+    text-align:center;
 }
 
 h2 {

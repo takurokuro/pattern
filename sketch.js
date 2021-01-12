@@ -111,7 +111,8 @@ var field = []
 var field_next = []
 
 function initialize() {
-    canvas = createCanvas(640, 480);
+    canvas = createCanvas(684, 600);
+    canvas.parent('canvas');
     pixelDensity(1);
     initFields();
 }
